@@ -56,11 +56,17 @@ This is a **fluid, community-improved** resource. We welcome issues and PRs that
 
 ## License
 
-**Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).**  
-You may copy, remix, transform, and build upon the material for any purpose, even commercially, **as long as** you provide appropriate credit and license derivatives under the same terms.
+- **Code** (HTML, JS, CSS): [MIT License](./LICENSE)  
+  © 2025 Expound Consulting — Ken Cheney & Robert Gibson  
 
-- Human-readable summary: https://creativecommons.org/licenses/by-sa/4.0/  
-- Legal code: https://creativecommons.org/licenses/by-sa/4.0/legalcode
+- **Content** (README, documentation, explanatory text, diagrams): [CC BY-SA 4.0](./LICENSE-CONTENT)  
+  You may copy, remix, transform, and build upon the material for any purpose, even commercially, 
+  as long as you provide appropriate credit and license derivatives under the same terms.  
+
+  Human-readable summary: https://creativecommons.org/licenses/by-sa/4.0/  
+  Legal code: https://creativecommons.org/licenses/by-sa/4.0/legalcode  
+
+Third-party libraries (e.g., Chart.js) remain under their original licenses.
 
 **Copyright © 2025 Expound Consulting — Ken Cheney & Robert Gibson.**
 
