@@ -12,7 +12,8 @@
 
 - **Who it’s for:** Founders (pre-seed → growth), operator-CEOs, CFOs, and curious VCs.
 - **What you’ll learn:** LP→GP dynamics, reserve strategies, partner meetings, valuation mechanics (including 409A context), board control, investor communications, and exit timing economics.
-
+## ▶️ Live Site
+[Open the VC Waterfall Calculator](https://expound-consulting.github.io/The-Fund-Equation/)
 ---
 
 ## Quick Start
