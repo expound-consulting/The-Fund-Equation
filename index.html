@@ -373,12 +373,16 @@
             align-items: center;
         }
 
-        /* Tabs for results view */
+        /* Tabs for results view - Fixed for mobile stability */
         .tabs {
             display: flex;
             gap: 0.5rem;
             margin-bottom: 1.5rem;
             border-bottom: 2px solid var(--gray-light);
+            position: relative; /* Add positioning context */
+            overflow-x: auto; /* Allow horizontal scroll on mobile */
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            scroll-behavior: smooth;
         }
 
         .tab-button {
@@ -392,6 +396,10 @@
             transition: var(--transition);
             position: relative;
             bottom: -2px;
+            white-space: nowrap; /* Prevent text wrapping */
+            flex-shrink: 0; /* Prevent button compression */
+            -webkit-tap-highlight-color: transparent; /* Remove iOS tap highlight */
+            touch-action: manipulation; /* Prevent double-tap zoom */
         }
 
         .tab-button:hover {
@@ -401,6 +409,7 @@
         .tab-button.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
+            pointer-events: none; /* Prevent re-clicking active tab */
         }
 
         .tab-content {
@@ -940,8 +949,8 @@
         }
         
         .table-scroll-wrapper {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch; /* Momentum scrolling on iOS */
+            position: relative;
+            isolation: isolate; /* Create new stacking context */
         }
 
         .table-scroll-wrapper table {
@@ -949,39 +958,40 @@
             min-width: 600px; /* Force scrolling on smaller screens */
         }
         
-        /* Make the first column sticky */
+        /* Make the first column sticky with proper layering */
         .table-scroll-wrapper th:first-child,
         .table-scroll-wrapper td:first-child {
             position: -webkit-sticky; /* For Safari */
             position: sticky;
             left: 0;
-            z-index: 1;
-             /* Add a shadow to indicate scrollability */
+            z-index: 10; /* Increased z-index to stay above other content */
+            /* Add a shadow to indicate scrollability */
             box-shadow: 5px 0 5px -5px rgba(0,0,0,0.1);
         }
 
-        /* Ensure header stays on top */
+        /* Ensure header stays on top with higher z-index */
         .table-scroll-wrapper th:first-child {
-            z-index: 2;
+            z-index: 11; /* Higher than body cells */
         }
-        
+
         /* Set background colors to prevent text overlap during scroll */
         .table-scroll-wrapper thead th {
             background: var(--primary);
             color: var(--white);
         }
-        
+
+        /* Important: Ensure sticky cells have solid backgrounds */
         .table-scroll-wrapper tbody tr td:first-child {
-            background: var(--white);
+            background: var(--white) !important; /* Force solid background */
         }
-        
+
         .table-scroll-wrapper tbody tr:nth-child(even) td:first-child {
-            background: var(--light);
+            background: var(--light) !important; /* Force solid background */
         }
-        
+
         /* Hover state for sticky column must also be handled */
         .table-scroll-wrapper tbody tr:hover td:first-child {
-            background: var(--primary-light);
+            background: var(--primary-light) !important;
         }
 
         /* Touch target improvements */
@@ -1110,13 +1120,6 @@
                 max-height: 400px;
             }
             
-            /* Table scroll improvements */
-            .table-scroll-wrapper {
-                margin: 0 -1rem;
-                padding: 0 1rem;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
             input[type="number"],
             input[type="date"] {
                 font-size: 16px; /* Prevent zoom on iOS */
@@ -1124,6 +1127,48 @@
             
             .input-field {
                 min-height: 44px; /* Apple's recommended touch target */
+            }
+
+            /* Tab improvements for mobile */
+            .tabs {
+                scroll-snap-type: x mandatory; /* Snap to tabs while scrolling */
+                padding-bottom: 0.5rem; /* Extra space for scroll indicator */
+            }
+            
+            .tab-button {
+                scroll-snap-align: start; /* Snap alignment */
+                min-width: 100px; /* Minimum width for readability */
+            }
+            
+            /* Ensure waterfall visualization doesn't break layout */
+            .card-content {
+                overflow-x: hidden; /* Prevent horizontal overflow */
+            }
+            
+            /* Fix table sticky column backgrounds */
+            .table-scroll-wrapper tbody tr td:first-child {
+                background-color: var(--white) !important;
+                opacity: 1;
+            }
+            
+            .table-scroll-wrapper tbody tr:nth-child(even) td:first-child {
+                background-color: var(--light) !important;
+                opacity: 1;
+            }
+            
+            /* Table total row fix */
+            .table-scroll-wrapper tbody tr:last-child td:first-child {
+                background: #003d7a !important;
+                color: var(--white) !important;
+            }
+            
+            /* Table scroll improvements */
+            .table-scroll-wrapper {
+                margin: 0 -1rem;
+                padding: 0 1rem;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior-x: contain; /* Prevent parent scroll */
             }
         }
         
@@ -1170,12 +1215,14 @@
     <div id="app"></div>
 
     <script>
-// VC Waterfall Calculator
-// 
-// Code: MIT License (see LICENSE)
-// Content: CC BY-SA 4.0 (see LICENSE-CONTENT)
-// 
-// © 2025 Expound Consulting – Ken Cheney & Robert Gibson
+        
+        // VC Waterfall Calculator
+
+        // Code: MIT License (see LICENSE)
+        // Content: CC BY-SA 4.0 (see LICENSE-CONTENT)
+
+       //  © 2025 Expound Consulting — Ken Cheney & Robert Gibson
+        
         // VC Waterfall Calculator - Complete Implementation
         const WaterfallCalculator = {
             // State Management
@@ -2077,7 +2124,7 @@
            │
            ▼
 ┌─────────────────────────────┐
-│  1️⃣ DEBT & EXPENSES         │ ◄── First Priority
+│  1️⃣ DEBT & EXPENSES = $8M   │ ◄── First Priority
 │    - Outstanding Debt       │
 │    - Legal Fees             │
 │    - Advisor Fees (%)       │
@@ -2093,20 +2140,20 @@
            ▼
 ┌─────────────────────────────┐
 │  3️⃣ LIQUIDATION PREFERENCES │ ◄── Preferred Shareholders
-│    Series C: 2x = $100M     │     (In order of seniority)
-│    Series B: 1.5x = $37.5M  │
+│    Series C: 1x = $20M      │     (In order of seniority)
+│    Series B: 1x = $15M      │
 │    Series A: 1x = $10M      │
 │    Seed: 1x = $2M           │
 │    + Accrued Dividends      │
 └──────────┬──────────────────┘
-           │ Remaining: $33.3M
+           │ Remaining: $35.8M
            ▼
 ┌─────────────────────────────┐
 │  4️⃣ MGMT INCENTIVE PLAN (MIP) │ ◄── If Enabled (from Participation Pool)
 │    10% of remaining         │
-│    = $3,330,000             │
+│    = $3.58M                 │
 └──────────┬──────────────────┘
-           │ Remaining: $29.97M
+           │ Remaining: $32.22M
            ▼
 ┌─────────────────────────────┐
 │  5️⃣ PARTICIPATION/COMMON    │ ◄── Pro-Rata Distribution
@@ -2468,7 +2515,7 @@
                                             VC Waterfall Calculator
                                         </h2>
                                         <p style="font-size: 1.5rem; color: var(--gray-dark); margin-bottom: 1rem;">
-                                            Version v.603
+                                            Version v0.604
                                         </p>
                                         <p style="margin-bottom: 2rem; color: var(--gray);">
                                             A comprehensive tool for modeling venture capital exit distributions,
@@ -2558,7 +2605,18 @@
                                 </div>
                                 <div class="card-content">
                                     <div class="term-box">
-                                        <h4>Version v.603 - September 2025 (Current)</h4>
+                                        <h4>Version v0.604 - September 2025 (Current)</h4>
+                                        <p style="margin-bottom: 0.5rem; color: var(--gray);">
+                                            Critical mobile responsiveness and calculation engine fixes.
+                                        </p>
+                                        <ul style="margin-left: 1.5rem;">
+                                            <li>📱 **Fix**: Corrected sticky column overlap on horizontal table scrolls.</li>
+                                            <li>📱 **Fix**: Prevented accidental tab switching during vertical scroll on Results page.</li>
+                                            <li>📱 **Fix**: Ensured waterfall visualization does not overflow on small screens.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="term-box">
+                                        <h4>Version v0.603 - September 2025</h4>
                                         <p style="margin-bottom: 0.5rem; color: var(--gray);">
                                             Calculation engine update with net-exercise and split handling improvements.
                                         </p>
@@ -3594,7 +3652,7 @@
                 }
                 
                 const distributions = [...this.state.results.distributions].sort((a, b) => 
-                    this.getCapitalStackOrder(b.type) - this.getCapitalStackOrder(a.type)
+                    WaterfallCalculator.getCapitalStackOrder(b.type) - WaterfallCalculator.getCapitalStackOrder(a.type)
                 );
                 const maxProceeds = Math.max(...distributions.map(d => d.totalProceeds));
                 
@@ -3605,18 +3663,21 @@
                             <span class="collapse-icon"></span>
                         </div>
                         <div class="card-content">
-                            <div style="padding: 1rem;">
-                                <div style="display: flex; align-items: center; margin-bottom: 1.5rem;">
-                                    <div style="background: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: var(--border-radius); font-weight: 600;">
-                                        Gross Exit: $${this.formatValue(this.state.results.grossExit)}
-                                    </div>
-                                    <div style="flex: 1; height: 2px; background: var(--primary); margin: 0 1rem;"></div>
-                                    <div style="background: var(--danger); color: white; padding: 0.5rem 1rem; border-radius: var(--border-radius);">
-                                        Expenses: -$${this.formatValue(this.state.results.grossExit - this.state.results.netProceeds)}
-                                    </div>
-                                    <div style="flex: 1; height: 2px; background: var(--danger); margin: 0 1rem;"></div>
-                                    <div style="background: var(--success); color: white; padding: 0.5rem 1rem; border-radius: var(--border-radius); font-weight: 600;">
-                                        Net: $${this.formatValue(this.state.results.netProceeds)}
+                            <div style="padding: 0.5rem;">
+                                <!-- Wrap in scrollable container for mobile -->
+                                <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                                    <div style="display: flex; align-items: center; margin-bottom: 1.5rem; min-width: 300px; gap: 0.5rem; flex-wrap: nowrap;">
+                                        <div style="background: var(--primary); color: white; padding: 0.5rem 0.75rem; border-radius: var(--border-radius); font-weight: 600; white-space: nowrap; flex-shrink: 0;">
+                                            Gross Exit: $${this.formatValue(this.state.results.grossExit)}
+                                        </div>
+                                        <div style="flex: 0 0 30px; height: 2px; background: var(--primary);"></div>
+                                        <div style="background: var(--danger); color: white; padding: 0.5rem 0.75rem; border-radius: var(--border-radius); white-space: nowrap; flex-shrink: 0;">
+                                            Expenses: -$${this.formatValue(this.state.results.grossExit - this.state.results.netProceeds)}
+                                        </div>
+                                        <div style="flex: 0 0 30px; height: 2px; background: var(--danger);"></div>
+                                        <div style="background: var(--success); color: white; padding: 0.5rem 0.75rem; border-radius: var(--border-radius); font-weight: 600; white-space: nowrap; flex-shrink: 0;">
+                                            Net: $${this.formatValue(this.state.results.netProceeds)}
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -3629,50 +3690,50 @@
                                         
                                         return `
                                             <div style="margin-bottom: 1rem;">
-                                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                                                    <span style="font-weight: 500;">${dist.name}</span>
-                                                    <span style="font-weight: 600;">$${this.formatValue(Math.round(dist.totalProceeds))}</span>
+                                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem; flex-wrap: wrap; gap: 0.5rem;">
+                                                    <span style="font-weight: 500; word-break: break-word;">${dist.name}</span>
+                                                    <span style="font-weight: 600; white-space: nowrap;">$${this.formatValue(Math.round(dist.totalProceeds))}</span>
                                                 </div>
                                                 <div style="height: 30px; background: var(--gray-light); border-radius: 4px; overflow: hidden; position: relative;">
-                                                    <div style="height: 100%; width: ${barWidth}%; display: flex;">
+                                                    <div style="height: 100%; width: ${barWidth}%; display: flex; min-width: 2px;">
                                                         ${dist.liquidationPref > 0 ? `
-                                                            <div style="width: ${prefWidth}%; background: var(--warning); position: relative;" 
+                                                            <div style="width: ${prefWidth}%; background: var(--warning); position: relative; min-width: 2px;" 
                                                                  title="Liquidation Preference: $${this.formatValue(Math.round(dist.liquidationPref))}">
-                                                                <span style="position: absolute; left: 4px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; font-weight: 600;">
+                                                                <span style="position: absolute; left: 4px; top: 50%; transform: translateY(-50%); font-size: 0.65rem; font-weight: 600;">
                                                                     ${prefWidth > 20 ? 'Pref' : ''}
                                                                 </span>
                                                             </div>
                                                         ` : ''}
                                                         ${dist.participation > 0 ? `
-                                                            <div style="flex: 1; background: ${dist.type === 'founders' ? 'var(--primary)' : 'var(--success)'}; position: relative;"
+                                                            <div style="flex: 1; background: ${dist.type === 'founders' ? 'var(--primary)' : 'var(--success)'}; position: relative; min-width: 2px;"
                                                                  title="Participation: $${this.formatValue(Math.round(dist.participation))}">
-                                                                <span style="position: absolute; left: 4px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; font-weight: 600; color: white;">
+                                                                <span style="position: absolute; left: 4px; top: 50%; transform: translateY(-50%); font-size: 0.65rem; font-weight: 600; color: white;">
                                                                     ${(100 - prefWidth) > 20 ? 'Part' : ''}
                                                                 </span>
                                                             </div>
                                                         ` : ''}
                                                     </div>
                                                 </div>
-                                                <div style="display: flex; gap: 1rem; margin-top: 0.25rem; font-size: 0.8rem; color: var(--gray);">
+                                                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.25rem; font-size: 0.75rem; color: var(--gray);">
                                                     ${dist.invested > 0 ? `
-                                                        <span>Invested: $${this.formatValue(dist.invested)}</span>
-                                                        <span><span class="tooltip multiline" data-tooltip="Multiple on Invested Capital - total return divided by investment">MOIC</span>: ${dist.moic.toFixed(2)}x</span>
+                                                        <span style="white-space: nowrap;">Invested: $${this.formatValue(dist.invested)}</span>
+                                                        <span style="white-space: nowrap;"><span class="tooltip multiline" data-tooltip="Multiple on Invested Capital - total return divided by investment">MOIC</span>: ${dist.moic.toFixed(2)}x</span>
                                                     ` : `
                                                         <span>No investment</span>
                                                     `}
                                                     ${dist.shares ? `
-                                                        <span>Ownership: ${this.safeCalculateOwnership(dist.shares, this.getTotalSharesWithSafes()).toFixed(1)}%</span>
+                                                        <span style="white-space: nowrap;">Ownership: ${this.safeCalculateOwnership(dist.shares, this.getTotalSharesWithSafes()).toFixed(1)}%</span>
                                                     ` : ''}
                                                 </div>
                                             </div>
                                         `;
                                     }).join('')}
                                     
-                                    <div style="margin-top: 1rem; padding: 0.5rem; background: var(--light); border-radius: 4px; font-size: 0.85rem;">
-                                        <div style="display: flex; gap: 1rem;">
-                                            <span><span style="display: inline-block; width: 12px; height: 12px; background: var(--warning); border-radius: 2px;"></span> <span class="tooltip multiline" data-tooltip="Priority return of invested capital before common shareholders">Liquidation Preference</span></span>
-                                            <span><span style="display: inline-block; width: 12px; height: 12px; background: var(--success); border-radius: 2px;"></span> Participation</span>
-                                            <span><span style="display: inline-block; width: 12px; height: 12px; background: var(--primary); border-radius: 2px;"></span> Common (Founders)</span>
+                                    <div style="margin-top: 1rem; padding: 0.5rem; background: var(--light); border-radius: 4px; font-size: 0.8rem;">
+                                        <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                                            <span style="white-space: nowrap;"><span style="display: inline-block; width: 12px; height: 12px; background: var(--warning); border-radius: 2px; vertical-align: middle;"></span> <span class="tooltip multiline" data-tooltip="Priority return of invested capital before common shareholders">Liquidation Preference</span></span>
+                                            <span style="white-space: nowrap;"><span style="display: inline-block; width: 12px; height: 12px; background: var(--success); border-radius: 2px; vertical-align: middle;"></span> Participation</span>
+                                            <span style="white-space: nowrap;"><span style="display: inline-block; width: 12px; height: 12px; background: var(--primary); border-radius: 2px; vertical-align: middle;"></span> Common (Founders)</span>
                                         </div>
                                     </div>
                                 </div>
@@ -6733,6 +6794,40 @@
             bindEvents() {
                 const appEl = document.getElementById('app');
 
+                // Add scroll detection
+                let scrollTimer = null;
+                this._isScrolling = false;
+                
+                window.addEventListener('scroll', () => {
+                    this._isScrolling = true;
+                    clearTimeout(scrollTimer);
+                    scrollTimer = setTimeout(() => {
+                        this._isScrolling = false;
+                    }, 150);
+                }, true);
+                
+                // Touch event handling for mobile
+                let touchStartY = 0;
+                let touchStartTime = 0;
+                
+                appEl.addEventListener('touchstart', (e) => {
+                    touchStartY = e.touches[0].clientY;
+                    touchStartTime = Date.now();
+                }, { passive: true });
+                
+                appEl.addEventListener('touchend', (e) => {
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const touchEndTime = Date.now();
+                    const deltaY = Math.abs(touchEndY - touchStartY);
+                    const deltaTime = touchEndTime - touchStartTime;
+                    
+                    // If it was a scroll gesture (moved more than 10px or took longer than 300ms), ignore clicks
+                    if (deltaY > 10 || deltaTime > 300) {
+                        this._isScrolling = true;
+                        setTimeout(() => { this._isScrolling = false; }, 100);
+                    }
+                }, { passive: true });
+
                 appEl.addEventListener('click', (e) => {
                     const collapsibleHeader = e.target.closest('.card-header[data-collapsible]');
                     if (collapsibleHeader) {
@@ -6765,7 +6860,10 @@
                     const tab = target.dataset.tab;
                     if (tab) {
                         e.preventDefault();
-                        this.switchTab(tab);
+                        // Add delay and check for scrolling
+                        if (!this._isScrolling) {
+                            this.switchTab(tab);
+                        }
                         return;
                     }
                 });
@@ -6847,6 +6945,9 @@
             },
             
             switchTab(tabName) {
+                // Prevent tab switching if user is scrolling
+                if (this._isScrolling) return;
+                
                 document.querySelectorAll('.tab-button').forEach(btn => {
                     btn.classList.toggle('active', btn.dataset.tab === tabName);
                 });
@@ -7260,4 +7361,4 @@
 
     </script>
 </body>
-</html>                
+</html>
